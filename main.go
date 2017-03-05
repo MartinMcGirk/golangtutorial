@@ -4,51 +4,27 @@ import (
 	"fmt"
 	"net/http"
 
-	"usegolang.com/views"
+	"usegolang.com/controllers"
 
 	"github.com/gorilla/mux"
 )
 
-var homeView *views.View
-var contactView *views.View
-var faqView *views.View
-var signUpView *views.View
-
 func main() {
-	homeView = views.NewView("bootstrap", "views/home.gohtml")
-	contactView = views.NewView("bootstrap", "views/contact.gohtml")
-	faqView = views.NewView("bootstrap", "views/faq.gohtml")
-	signUpView = views.NewView("bootstrap", "views/signup.gohtml")
+	staticC := controllers.NewStatic()
+	usersC := controllers.NewUsers()
+	galleriesC := controllers.NewGalleries()
 
 	r := mux.NewRouter()
-	r.HandleFunc("/", home)
-	r.HandleFunc("/contact", contact)
-	r.HandleFunc("/faq", faq)
-	r.HandleFunc("/signup", signUp)
+	r.Handle("/", staticC.Home).Methods("GET")
+	r.Handle("/contact", staticC.Contact).Methods("GET")
+	r.Handle("/faq", staticC.Faq).Methods("GET")
+	r.HandleFunc("/signup", usersC.New).Methods("GET")
+	r.HandleFunc("/signup", usersC.Create).Methods("POST")
+	r.HandleFunc("/galleries", galleriesC.New).Methods("GET")
 
 	r.NotFoundHandler = http.HandlerFunc(notFound)
 
 	http.ListenAndServe(":3000", r)
-}
-
-func home(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	homeView.Render(w, nil)
-}
-
-func contact(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	contactView.Render(w, nil)
-}
-
-func faq(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	faqView.Render(w, nil)
-}
-
-func signUp(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	signUpView.Render(w, nil)
 }
 
 func notFound(w http.ResponseWriter, req *http.Request) {
